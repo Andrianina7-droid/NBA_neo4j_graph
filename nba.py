@@ -18,7 +18,7 @@ class NBASystem:
         for label in ["Player", "Team", "Game"]:
             self.run(f"CREATE CONSTRAINT IF NOT EXISTS FOR (n:{label}) REQUIRE n.id IS UNIQUE")
 
-        # 1. Import Teams
+        # Import Teams
         print("Import Teams...")
         self.run("""
             LOAD CSV WITH HEADERS FROM 'file:///teams.csv' AS r
@@ -26,7 +26,7 @@ class NBASystem:
             SET t.name = r.NICKNAME, t.city = r.CITY, t.abbr = r.ABBREVIATION
         """)
 
-        # 2. Import Players + PLAYS_FOR
+        # Import Players et le lien : PLAYS_FOR
         print("Import Players...")
         self.run("""
             LOAD CSV WITH HEADERS FROM 'file:///players.csv' AS r
@@ -35,7 +35,7 @@ class NBASystem:
             MERGE (p)-[:PLAYS_FOR {season: toInteger(r.SEASON)}]->(t)
         """)
 
-        # 3. Import Games + HOSTED/VISITED
+        # Import Games HOSTED/VISITED
         print("Import Games...")
         self.run("""
             LOAD CSV WITH HEADERS FROM 'file:///games.csv' AS r
@@ -69,7 +69,6 @@ class NBASystem:
             print(f"[{r['d']}] {r['h']} ({r['hp']}) vs {r['v']} ({r['vp']})")
 
 if __name__ == "__main__":
-    # Paramètres de ton instance active
     sys = NBASystem("bolt://localhost:7687", "neo4j", "secondtry")
     try:
         sys.setup()
